@@ -6,7 +6,7 @@ import hashlib, sys, re
 
 root=Path(__file__).resolve().parents[1]
 lesson_dir=root/"lessons"
-lessons=list(lesson_dir.glob("*.html"))
+lessons=list(lesson_dir.rglob("[0-9]*.html"))
 
 class P(HTMLParser):
     def __init__(self):
