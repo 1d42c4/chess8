@@ -4,7 +4,7 @@
 
 1,000 standalone chess lessons in 20 divisions, plus interactive Hippo and King’s Indian courses.
 
-This repository publishes the complete contents of the supplied `OnePageLove` folder, with its existing directory structure. The root `index.html` is the website entry point.
+This repository publishes the complete contents of the supplied `OnePageLove` folder, with lessons grouped into category subfolders. The root `index.html` is the website entry point.
 
 ## Start learning
 
@@ -23,6 +23,12 @@ This repository publishes the complete contents of the supplied `OnePageLove` fo
 | [chess9](https://github.com/knightway8/chess9) | Positional Logic | [Open site](https://knightway8.github.io/chess9/) |
 | [chess10](https://github.com/knightway8/chess10) | The Earlier Advantage | [Open site](https://knightway8.github.io/chess10/) |
 
+## Lesson folders
+
+The 1,000 lessons are organized into 20 category folders containing 50 lessons each. [Browse the lesson directory](lessons/README.md). Each folder includes a README. Navigation, search, related lessons, and download instructions use the new paths.
+
+Older GitHub Pages lesson bookmarks are recognized by the custom 404 page and redirected in the browser, preserving query strings and anchors. With JavaScript disabled, use the course-home link on that page. Original GitHub file URLs remain available in commit history.
+
 ## Files and downloads
 
 All 1,035 original source files are included. Any existing course archives, tools, and documentation remain available. Use **Code → Download ZIP** to download this repository, or clone it with Git:
@@ -31,7 +37,11 @@ All 1,035 original source files are included. Any existing course archives, tool
 git clone https://github.com/knightway8/chess8.git
 ```
 
-`SOURCE_MANIFEST.json` records every original file, its original and uploaded SHA-256 hashes, and the deliberate publishing changes. These include the repository README, Pages settings files, and any repaired site links.
+`SOURCE_MANIFEST.json` records every original file, its original path when moved, and its original and current uploaded SHA-256 hashes, and the deliberate publishing changes. These include the repository README, Pages settings files, and any repaired site links.
+
+## Check future changes
+
+Run `python tools/check_layout.py` before publishing. It checks that every directory stays below 1,000 entries, all 1,000 lessons are present, local links resolve, and source-manifest checksums match.
 
 ## Publishing and protection
 
