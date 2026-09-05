@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hippo Counter-Trainer — When to Abandon the Shell</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --panel:#fffdf8; --ink:#171717; --muted:#666258;
+    --light:#e8dfca; --dark:#8d765d; --line:#c9c0ad;
+    --good:#1f7a47; --warn:#a65f00; --danger:#a52a2a; --accent:#254f6e;
+    --shadow:0 10px 30px rgba(40,34,25,.10);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+  button,input{font:inherit}
+  button{cursor:pointer}
+  .app{max-width:1240px;margin:0 auto;padding:24px}
+  header{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+  h1{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.05;margin:.1em 0 .25em}
+  .subtitle{max-width:760px;color:var(--muted);font-size:1.02rem}
+  .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:#fffaf0;font-weight:700;font-size:.88rem;white-space:nowrap}
+  .layout{display:grid;grid-template-columns:minmax(340px,610px) minmax(330px,1fr);gap:22px;align-items:start}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+  .board-card{padding:16px;position:sticky;top:12px}
+  .board-wrap{position:relative;max-width:580px;margin:0 auto}
+  .board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border:2px solid #352f29;border-radius:8px;overflow:hidden;background:#ddd;user-select:none}
+  .sq{position:relative;display:flex;align-items:center;justify-content:center;font-weight:800;aspect-ratio:1;outline:none;border:0;padding:0}
+  .sq.light{background:var(--light)} .sq.dark{background:var(--dark)}
+  .sq.selected{box-shadow:inset 0 0 0 5px #ffd24c}
+  .sq.target{box-shadow:inset 0 0 0 5px #56a8e8}
+  .sq.good{box-shadow:inset 0 0 0 6px #36a767}
+  .sq.bad{box-shadow:inset 0 0 0 6px #ce4d45}
+  .coord{position:absolute;font-size:11px;font-weight:900;opacity:.78;pointer-events:none}
+  .file{right:4px;bottom:2px}.rank{left:4px;top:2px}
+  .piece{width:70%;height:70%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,4.6vw,34px);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:950;box-shadow:0 2px 4px rgba(0,0,0,.22)}
+  .piece.white{background:#fff;color:#111;border:3px solid #242424}
+  .piece.black{background:#1e1e1e;color:#fff;border:3px solid #fafafa}
+  .piece.unicode{font-family:"DejaVu Sans","Noto Sans Symbols 2","Segoe UI Symbol",sans-serif;border-radius:10px;font-size:clamp(26px,5.2vw,42px);background:transparent;box-shadow:none}
+  .piece.unicode.white{color:#fff;text-shadow:-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111,1px 1px 0 #111,0 2px 2px #111;border:0}
+  .piece.unicode.black{color:#111;text-shadow:0 1px 0 rgba(255,255,255,.55);border:0}
+  .board-controls,.mode-row,.nav-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .btn{border:1px solid #aaa08f;background:#fff;border-radius:9px;padding:9px 12px;font-weight:750;color:#27231f}
+  .btn:hover{background:#f2ede2}.btn.primary{background:#233f55;color:white;border-color:#233f55}.btn.danger{background:#7b2e2e;color:white;border-color:#7b2e2e}.btn.good{background:#286442;color:#fff;border-color:#286442}
+  .btn:focus-visible,.sq:focus-visible{outline:3px solid #56a8e8;outline-offset:2px}
+  .move-entry{display:flex;gap:8px;margin-top:12px}.move-entry input{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:white}
+  .hint{margin-top:9px;color:var(--muted);font-size:.88rem}
+  .right{display:grid;gap:15px}
+  .lesson{padding:20px}
+  .eyebrow{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:var(--muted)}
+  .lesson h2{font-size:1.65rem;margin:.18em 0 .35em;line-height:1.1}
+  .status{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:.77rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px}
+  .status.red{background:#fde5e1;color:#842317}.status.yellow{background:#fff0c9;color:#7d4f00}.status.green{background:#ddf4e5;color:#1f613b}
+  .rule{border-left:5px solid var(--accent);background:#eef4f8;padding:13px 14px;margin:14px 0;border-radius:0 10px 10px 0;font-weight:750}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mini{border:1px solid var(--line);border-radius:11px;padding:12px;background:#fff}
+  .mini strong{display:block;margin-bottom:4px}.mini p{margin:0;color:#4e4a43}
+  .answer{display:none;margin-top:14px;padding:14px;border:1px solid #9bbda7;border-radius:12px;background:#eff8f2}.answer.show{display:block}
+  .answer h3{margin:0 0 7px;font-size:1.05rem}.answer ul{margin:.45em 0 .2em;padding-left:1.25em}
+  .scenario-list{padding:14px}.scenario-list h3{margin:3px 7px 10px}
+  .scenario-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.scenario-btn{text-align:left;border:1px solid var(--line);background:white;border-radius:10px;padding:10px;min-height:64px}.scenario-btn.active{border:2px solid #254f6e;background:#eef4f8}.scenario-btn small{display:block;color:var(--muted);margin-top:2px}.scenario-btn .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}.dot.red{background:var(--danger)}.dot.yellow{background:var(--warn)}.dot.green{background:var(--good)}
+  .score{padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}.metric{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px}.metric b{display:block;font-size:1.25rem}.metric span{font-size:.75rem;color:var(--muted)}
+  .cheat{padding:18px;overflow:auto}.cheat h2{margin-top:0}.cheat table{width:100%;border-collapse:collapse;font-size:.92rem;min-width:700px}.cheat th,.cheat td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}.cheat th{background:#f0ebe0;position:sticky;top:0}.kbd{display:inline-block;border:1px solid #aaa08f;border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:white;font:700 .78rem ui-monospace,monospace}
+  .note{padding:16px 18px;color:#48443e}.note strong{color:#222}.footer{color:var(--muted);font-size:.84rem;margin:18px 2px 4px}.hidden{display:none!important}
+  .flash{animation:flash .45s ease}@keyframes flash{0%{transform:scale(1)}50%{transform:scale(1.015)}100%{transform:scale(1)}}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.board-card{position:static}.scenario-buttons{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.score{grid-template-columns:repeat(2,1fr)}header{display:block}.pill{margin-top:9px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div>
+    <div class="eyebrow">Offline chess training • single HTML file</div>
+    <h1>Hippo Counter-Trainer</h1>
+    <div class="subtitle">You already know the formation. This course trains the harder skill: <strong>recognizing when White's setup means you should transform, lock the center, or abandon the Hippo shell entirely.</strong></div>
+  </div>
+  <div class="pill">Rule: shape → trigger → response</div>
+</header>
+
+<div class="layout">
+  <section class="card board-card">
+    <div class="board-wrap"><div id="board" class="board" aria-label="Chess board"></div></div>
+    <div class="board-controls">
+      <button class="btn" id="flipBtn">Flip board</button>
+      <button class="btn" id="piecesBtn">Pieces: letters</button>
+      <button class="btn" id="resetBtn">Reset position</button>
+    </div>
+    <div class="move-entry">
+      <input id="moveInput" autocomplete="off" spellcheck="false" placeholder="Enter move, e.g. e6e5 or Nf6" aria-label="Move answer" />
+      <button class="btn primary" id="tryBtn">Try</button>
+    </div>
+    <div class="hint">Or click the <strong>from-square</strong> and then the <strong>to-square</strong>. This trainer checks the idea, not full chess legality.</div>
+    <div class="nav-row">
+      <button class="btn" id="prevBtn">← Previous</button>
+      <button class="btn" id="randomBtn">Random drill</button>
+      <button class="btn" id="nextBtn">Next →</button>
+      <button class="btn good" id="showBtn">Show response</button>
+    </div>
+  </section>
+
+  <main class="right">
+    <section class="card lesson" id="lesson"></section>
+    <section class="card scenario-list">
+      <h3>Problem patterns</h3>
+      <div class="scenario-buttons" id="scenarioButtons"></div>
+    </section>
+    <section class="card score" aria-label="Training score">
+      <div class="metric"><b id="correctStat">0</b><span>Correct</span></div>
+      <div class="metric"><b id="wrongStat">0</b><span>Wrong</span></div>
+      <div class="metric"><b id="streakStat">0</b><span>Streak</span></div>
+      <div class="metric"><b id="masteredStat">0/8</b><span>Mastered</span></div>
+    </section>
+  </main>
+</div>
+
+<section class="card cheat" style="margin-top:20px">
+  <h2>The anti-Hippo decision map</h2>
+  <table>
+    <thead><tr><th>What White shows</th><th>Your default reaction</th><th>What you are trying to prevent</th></tr></thead>
+    <tbody>
+      <tr><td><strong>d4-e4-f4</strong> before you finish the shell</td><td><strong>Abort the autopilot.</strong> Develop <code>...Nf6</code> and play a Pirc/Modern-style fight for the center.</td><td>White using the extra tempo to blast open a cramped undeveloped position.</td></tr>
+      <tr><td><strong>c4-d4-e4</strong> broad center</td><td><strong>Transform early.</strong> <code>...Nf6</code> is the cleanest sign that you are no longer insisting on a pure Hippo.</td><td>Being squeezed while White owns too much central space.</td></tr>
+      <tr><td>White commits <strong>d5</strong></td><td>Usually meet it with <strong><code>...e5</code></strong>, then prepare the <strong><code>...f5</code></strong> lever.</td><td>Leaving the center fluid while your pieces have little room.</td></tr>
+      <tr><td>White commits <strong>e5</strong></td><td>Usually meet it with <strong><code>...d5</code></strong>, then look for <strong><code>...c5</code></strong>.</td><td>Letting White gain space without giving yourself a counter-break.</td></tr>
+      <tr><td><strong>g4-g5</strong> pawn storm</td><td>When tactically safe, <strong><code>...h5</code></strong> can lock that wing. Then counter in the center.</td><td>Opening files directly against your king for free.</td></tr>
+      <tr><td><strong>h4-h5</strong> hits g6</td><td>When tactically safe, <strong><code>...g5</code></strong> closes the contact. Do not treat castling as mandatory.</td><td>Allowing hxg6 to rip open the kingside on White's terms.</td></tr>
+      <tr><td><strong>Be3-Qd2-h4</strong> / obvious opposite-wing attack</td><td><strong>Do not castle by reflex.</strong> Hit the center with <code>...c5</code> (or <code>...d5</code> when appropriate) and decide king placement later.</td><td>Walking your king into the attack White has already announced.</td></tr>
+      <tr><td>Nothing has actually committed yet</td><td><strong>Keep flexibility.</strong> A waiting move is often better than forcing a break just because the setup is complete.</td><td>Helping White by declaring your structure first.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="card note" style="margin-top:16px">
+  <strong>Important:</strong> these are memory anchors, not forced engine moves. The Hippo is a flexible family of positions, so tactics and move order can override the rule. The goal is to stop the most common failure mode: completing the pretty formation after White has already played a setup that makes that formation strategically inappropriate.
+</section>
+
+<div class="footer">
+Keyboard: <span class="kbd">←</span>/<span class="kbd">→</span> scenario • <span class="kbd">Space</span> reveal • <span class="kbd">R</span> random • <span class="kbd">F</span> flip. Progress is stored only in your browser's localStorage.
+</div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const FILES='abcdefgh';
+const PIECE_LETTER={p:'P',n:'N',b:'B',r:'R',q:'Q',k:'K'};
+const UNI={P:'♙',N:'♘',B:'♗',R:'♖',Q:'♕',K:'♔',p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
+
+const scenarios=[
+{
+ id:'austrian', level:'red', short:'d4-e4-f4', title:'Red flag: the Austrian-style three-pawn center',
+ fen:'rnbqk1nr/ppppppbp/3p2p1/8/3PPP2/2N5/PPP3PP/R1BQKBNR b KQkq - 0 4',
+ prompt:'White has added f4 before you completed the Hippo. What should your next development decision be?',
+ answerMove:'g8f6', san:'...Nf6', aliases:['nf6','...nf6'],
+ rule:'Do not keep building the Hippo on autopilot. Treat f4 as a trigger to leave the pure shell and fight the center now.',
+ threat:'White has d4-e4-f4: space plus an immediate e5/f5 expansion. If you spend several more tempos on ...a6, ...b6, ...h6 and slow redeployment, White can open the position while you are cramped.',
+ plan:['Play ...Nf6 and enter a Pirc/Modern-style structure.','Pressure e4 and make White justify the big center.','Choose ...c5 or ...e5 according to the concrete position instead of insisting on the Hippo diagram.'],
+ mistake:'Finishing the entire Hippo formation simply because that was the original plan.',
+ memory:'Three white center pawns = stop decorating the shell.'
+},
+{
+ id:'broad', level:'red', short:'c4-d4-e4', title:'Red flag: the broad c4-d4-e4 center',
+ fen:'rnbqk1nr/ppppppbp/3p2p1/8/2PPP3/2N5/PP3PPP/R1BQKBNR b KQkq - 0 4',
+ prompt:'White has taken the full c4-d4-e4 center. Which move clearly announces that you are transforming rather than remaining a pure Hippo?',
+ answerMove:'g8f6', san:'...Nf6', aliases:['nf6','...nf6'],
+ rule:'Against a broad three-pawn center, active development matters more than preserving the exact Hippo piece placement.',
+ threat:'White can gain even more space or open the center before your back rank is ready. A cramped setup is most resilient when the center stays closed; this setup gives White too many ways to change that.',
+ plan:['Develop ...Nf6.','Be ready to transpose toward King\'s Indian / Modern structures.','Challenge the center with ...e5 or ...c5 when the tactics permit.'],
+ mistake:'Thinking “the Hippo works against anything, so move order does not matter.”',
+ memory:'c4 joins d4-e4 = transform early.'
+},
+{
+ id:'d5', level:'yellow', short:'White plays d5', title:'Center trigger: White advances d5',
+ fen:'r2q1rk1/1bpnnpb1/pp1pp1pp/3P4/4P3/2N2N2/PPP1BPPP/R1BQ1RK1 b - - 0 1',
+ prompt:'White has fixed a pawn on d5. Find the standard locking response.',
+ answerMove:'e6e5', san:'...e5', aliases:['e5','...e5'],
+ rule:'When White commits d5, ...e5 often closes the center and tells you where your counterplay belongs: the kingside with ...f5.',
+ threat:'If the center remains fluid, White can choose favorable exchanges while your pieces still have less space.',
+ plan:['Lock with ...e5.','Re-route pieces toward the kingside.','Prepare ...f5; only launch it when your pieces support the opening of lines.'],
+ mistake:'Playing ...f5 immediately without first understanding whether the center is stable enough.',
+ memory:'d5 → e5 lock → f5 lever.'
+},
+{
+ id:'e5', level:'yellow', short:'White plays e5', title:'Center trigger: White advances e5',
+ fen:'r2q1rk1/1bpnnpb1/pp1pp1pp/4P3/3P4/2N2N2/PPP1BPPP/R1BQ1RK1 b - - 0 1',
+ prompt:'White has planted a pawn on e5. Find the mirror-image locking response.',
+ answerMove:'d6d5', san:'...d5', aliases:['d5','...d5'],
+ rule:'When White commits e5, ...d5 often closes the center and points your counterplay toward the queenside/center with ...c5.',
+ threat:'White wants space and may use e5 to chase pieces or support a kingside attack. Closing the center denies easy central entry and creates a fixed target chain.',
+ plan:['Lock with ...d5.','Prepare ...c5 against d4.','Use the b7 bishop and queenside pieces once files begin to open.'],
+ mistake:'Automatically pushing ...f5 because “Hippo equals kingside attack.”',
+ memory:'e5 → d5 lock → c5 lever.'
+},
+{
+ id:'gstorm', level:'yellow', short:'g4-g5 storm', title:'Wing trigger: White throws the g-pawn',
+ fen:'r2q1rk1/1bpnnpb1/pp1pp1pp/6P1/3PP3/2N2N2/PPP1BP1P/R1BQ1RK1 b - - 0 1',
+ prompt:'White has pushed g4-g5 against your kingside. What simple locking move should immediately be in your candidate set?',
+ answerMove:'h6h5', san:'...h5', aliases:['h5','...h5'],
+ rule:'A wing attack is much less frightening when you can close the contact. ...h5 is a thematic clamp against a white pawn on g5, provided tactics do not refute it.',
+ threat:'White wants gxh6, open files, and direct access to your king. Letting the pawn storm open lines for free is the real danger.',
+ plan:['Consider ...h5 to lock the wing.','Do not rush to open that same wing yourself.','Counter in the center while White\'s advanced pawn becomes a fixed object.'],
+ mistake:'Responding to every wing pawn with a pawn capture that opens files toward your own king.',
+ memory:'g5 attacks → ...h5 locks.'
+},
+{
+ id:'hstorm', level:'yellow', short:'h4-h5 storm', title:'Wing trigger: White hits g6 with h4-h5',
+ fen:'r2q1rk1/1bpnnpb1/pp1pp1pp/7P/3PP3/2N2N2/PPP1BPP1/R1BQ1RK1 b - - 0 1',
+ prompt:'White is threatening hxg6 and wants to open the h-file/g-file complex. What closing move is the first one to calculate?',
+ answerMove:'g6g5', san:'...g5', aliases:['g5','...g5'],
+ rule:'When h5 is attacking g6, ...g5 can remove the contact and close the wing. It is a candidate, not a commandment: calculate before weakening dark squares.',
+ threat:'If White captures on g6 under favorable conditions, the supposedly solid kingside may become exactly the open target White wanted.',
+ plan:['Calculate ...g5 first.','If you have not castled, keep king placement flexible.','Use a central break to punish the time White spent moving the h-pawn twice.'],
+ mistake:'Castling automatically and only then asking how to meet h5.',
+ memory:'h5 hits g6 → calculate ...g5 before anything fancy.'
+},
+{
+ id:'150', level:'red', short:'Be3-Qd2-h4', title:'Red flag: White announces an opposite-wing attack',
+ fen:'r2qk2r/1bpnnpb1/pp1pp1pp/8/3PP2P/2N1BN2/PPPQ1PP1/2KR1B1R b kq - 0 1',
+ prompt:'White has Be3, Qd2, h4 and has committed the king queenside. What central counter should be high on your list instead of castling into the attack?',
+ answerMove:'c7c5', san:'...c5', aliases:['c5','...c5'],
+ rule:'Once White has told you where the king attack is going, king placement is a choice—not a ritual. Strike the center before volunteering your king as a target.',
+ threat:'White wants h5, Bh6, and a direct pawn storm. If you castle short automatically, White receives a clear plan with tempo.',
+ plan:['Hit d4 with ...c5.','Keep your king flexible until the center clarifies.','If the center closes, attack the wing where White castled rather than blindly defending yours.'],
+ mistake:'“My setup says castle short, therefore I castle short.”',
+ memory:'Attack announced → delay king commitment → hit center.'
+},
+{
+ id:'wait', level:'green', short:'No real commitment', title:'Control case: do not manufacture a crisis',
+ fen:'r2qk2r/1bpnnpb1/pp1pp1pp/8/3PP3/2N2N2/PPP1BPPP/R1BQK2R b KQkq - 0 1',
+ prompt:'White has a normal center but has not committed d5/e5/f4/c4 or a wing pawn storm. What is the lesson here?',
+ answerMove:'a8b8', san:'wait / improve', aliases:['wait','improve','nothing','rb8','...rb8'],
+ rule:'Not every position demands an immediate break. If White has not revealed the direction of play, preserving flexibility can be the strongest practical decision.',
+ threat:'The danger here is self-inflicted: choosing ...f5, ...c5, ...d5 or ...e5 too soon may tell White exactly how to arrange the pieces.',
+ plan:['Improve a piece or make a useful waiting move.','Watch for d5, e5, f4, c4 or a wing pawn rush.','Only then choose the break that attacks White\'s commitment.'],
+ mistake:'Believing the completed Hippo setup comes with an expiration timer that forces you to break immediately.',
+ memory:'No commitment = keep options.'
+}
+];
+
+let idx=0, flipped=false, unicode=false, selected=null, currentFen='', revealed=false;
+let stats=loadStats();
+
+function loadStats(){try{return JSON.parse(localStorage.getItem('hippoCounterStats'))||{correct:0,wrong:0,streak:0,by:{}}}catch(e){return{correct:0,wrong:0,streak:0,by:{}}}}
+function saveStats(){localStorage.setItem('hippoCounterStats',JSON.stringify(stats));updateStats()}
+function squareColor(file,rank){return ((file+rank)%2===0)?'dark':'light'}
+function fenToMap(fen){const map={}; const rows=fen.split(' ')[0].split('/'); for(let r=0;r<8;r++){let f=0; for(const ch of rows[r]){if(/\d/.test(ch)){f+=+ch}else{map[FILES[f]+(8-r)]=ch;f++}}} return map}
+function pieceHtml(ch){if(!ch)return''; const white=ch===ch.toUpperCase(); const letter=PIECE_LETTER[ch.toLowerCase()]; const text=unicode?UNI[ch]:letter; return `<span class="piece ${white?'white':'black'} ${unicode?'unicode':''}" aria-label="${white?'White':'Black'} ${letter}">${text}</span>`}
+function renderBoard(fen=currentFen){currentFen=fen; const map=fenToMap(fen); const b=document.getElementById('board'); b.innerHTML=''; const ranks=flipped?[1,2,3,4,5,6,7,8]:[8,7,6,5,4,3,2,1]; const files=flipped?[...FILES].reverse():[...FILES];
+ for(let ri=0;ri<8;ri++)for(let fi=0;fi<8;fi++){const sq=files[fi]+ranks[ri]; const trueFile=FILES.indexOf(sq[0]), trueRank=+sq[1]; const el=document.createElement('button'); el.className=`sq ${squareColor(trueFile,trueRank)}`; el.dataset.sq=sq; el.setAttribute('aria-label',sq); el.innerHTML=pieceHtml(map[sq])+`<span class="coord rank">${fi===0?sq[1]:''}</span><span class="coord file">${ri===7?sq[0]:''}</span>`; el.onclick=()=>clickSquare(sq,el); b.appendChild(el)}
+}
+function scenario(){return scenarios[idx]}
+function renderLesson(){const s=scenario(); revealed=false; selected=null; document.getElementById('moveInput').value=''; renderBoard(s.fen);
+ document.getElementById('lesson').innerHTML=`
+   <div class="status ${s.level}">${s.level==='red'?'abandon / transform':s.level==='yellow'?'respond now':'stay flexible'}</div>
+   <div class="eyebrow">Scenario ${idx+1} of ${scenarios.length}</div>
+   <h2>${s.title}</h2>
+   <p><strong>Your task:</strong> ${s.prompt}</p>
+   <div class="rule">${s.rule}</div>
+   <div class="grid2">
+     <div class="mini"><strong>What White is threatening</strong><p>${s.threat}</p></div>
+     <div class="mini"><strong>Memory hook</strong><p>${s.memory}</p></div>
+   </div>
+   <div class="answer" id="answerBox">
+     <h3>Response: ${s.san}</h3>
+     <ul>${s.plan.map(x=>`<li>${x}</li>`).join('')}</ul>
+     <p><strong>Common mistake:</strong> ${s.mistake}</p>
+   </div>`;
+ renderScenarioButtons(); updateStats();
+}
+function renderScenarioButtons(){const wrap=document.getElementById('scenarioButtons'); wrap.innerHTML=''; scenarios.forEach((s,i)=>{const d=stats.by[s.id]||{c:0,w:0};const btn=document.createElement('button');btn.className='scenario-btn'+(i===idx?' active':'');btn.innerHTML=`<span class="dot ${s.level}"></span><strong>${s.short}</strong><small>${d.c} right / ${d.w} wrong</small>`;btn.onclick=()=>{idx=i;renderLesson()};wrap.appendChild(btn)})}
+function normalize(x){return x.toLowerCase().replace(/\s+/g,'').replace(/[+#?!]/g,'').replace(/^\.\.\./,'')}
+function accepts(text,s){const n=normalize(text); return n===normalize(s.answerMove)||n===normalize(s.san)||s.aliases.some(a=>n===normalize(a))}
+function flashSquares(move,good){document.querySelectorAll('.sq').forEach(e=>e.classList.remove('good','bad','target','selected')); if(/^[a-h][1-8][a-h][1-8]$/.test(move)){for(const sq of [move.slice(0,2),move.slice(2,4)]){const el=document.querySelector(`[data-sq="${sq}"]`);if(el)el.classList.add(good?'good':'bad')}}}
+function grade(text){const s=scenario(); const ok=accepts(text,s); stats.by[s.id]=stats.by[s.id]||{c:0,w:0}; if(ok){stats.correct++;stats.streak++;stats.by[s.id].c++;flashSquares(s.answerMove,true);showAnswer();toast('Correct — '+s.san,true)}else{stats.wrong++;stats.streak=0;stats.by[s.id].w++;flashSquares(s.answerMove,false);toast('Not the anchor response. Reveal it, then retry later.',false)} saveStats()}
+function showAnswer(){revealed=true; const box=document.getElementById('answerBox'); if(box)box.classList.add('show'); flashSquares(scenario().answerMove,true)}
+function clickSquare(sq,el){if(!selected){selected=sq; document.querySelectorAll('.sq').forEach(x=>x.classList.remove('selected','target','good','bad')); el.classList.add('selected');return} const move=selected+sq; selected=null; document.querySelectorAll('.sq').forEach(x=>x.classList.remove('selected')); grade(move)}
+function toast(msg,good){const lesson=document.getElementById('lesson'); let t=document.getElementById('toast'); if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='margin-top:12px;padding:10px 12px;border-radius:9px;font-weight:800';lesson.appendChild(t)} t.textContent=msg;t.style.background=good?'#ddf4e5':'#fde5e1';t.style.color=good?'#1f613b':'#842317';t.classList.remove('flash');void t.offsetWidth;t.classList.add('flash')}
+function updateStats(){document.getElementById('correctStat').textContent=stats.correct;document.getElementById('wrongStat').textContent=stats.wrong;document.getElementById('streakStat').textContent=stats.streak; const m=scenarios.filter(s=>(stats.by[s.id]?.c||0)>=3).length;document.getElementById('masteredStat').textContent=`${m}/${scenarios.length}`}
+function go(n){idx=(idx+n+scenarios.length)%scenarios.length;renderLesson()}
+function random(){let n=idx;while(n===idx&&scenarios.length>1)n=Math.floor(Math.random()*scenarios.length);idx=n;renderLesson()}
+
+document.getElementById('tryBtn').onclick=()=>{const v=document.getElementById('moveInput').value.trim();if(v)grade(v)};
+document.getElementById('moveInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('tryBtn').click()}});
+document.getElementById('showBtn').onclick=showAnswer;
+document.getElementById('prevBtn').onclick=()=>go(-1);document.getElementById('nextBtn').onclick=()=>go(1);document.getElementById('randomBtn').onclick=random;
+document.getElementById('flipBtn').onclick=()=>{flipped=!flipped;renderBoard()};
+document.getElementById('piecesBtn').onclick=()=>{unicode=!unicode;document.getElementById('piecesBtn').textContent='Pieces: '+(unicode?'symbols':'letters');renderBoard()};
+document.getElementById('resetBtn').onclick=()=>renderLesson();
+window.addEventListener('keydown',e=>{if(document.activeElement===document.getElementById('moveInput'))return;if(e.key==='ArrowLeft'){go(-1)}else if(e.key==='ArrowRight'){go(1)}else if(e.code==='Space'){e.preventDefault();showAnswer()}else if(e.key.toLowerCase()==='r'){random()}else if(e.key.toLowerCase()==='f'){flipped=!flipped;renderBoard()}});
+renderLesson();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://knightway8.github.io/chess8/sitemap.xml

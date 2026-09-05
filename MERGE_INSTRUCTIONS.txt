@@ -1,0 +1,22 @@
+ONEPAGELOVE — QUICK MERGE REFERENCE
+
+From your local cloned OnePageLove repository:
+
+1. Copy everything INSIDE the unzipped OnePageLove-1000-Chess-Lessons folder
+   into the root of your existing OnePageLove repo.
+
+2. Do not delete your existing:
+   hippo-counter-trainer.html
+   hippopotamus-course.html
+   kings-indian-course.html
+
+3. Verify:
+   python3 tools/verify_site.py
+
+4. Upload:
+   git status
+   git add .
+   git commit -m "Add 1000-page OnePageLove chess library"
+   git push
+
+GitHub Pages will update automatically if it is already enabled for main /(root).

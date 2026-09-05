@@ -1,0 +1,54 @@
+ONEPAGELOVE CHESS — 1,000-LESSON GITHUB PAGES PACKAGE
+
+LESSON LIBRARY
+- 1,000 standalone lesson HTML files
+- 20 category pages
+- 200 base chess subjects
+- 5 lesson types per subject:
+  1. Complete Guide
+  2. Recognition Guide
+  3. Decision Rules
+  4. Mistakes and Counterplay
+  5. Training and Self-Test
+
+SITE FILES
+- index.html — searchable/filterable homepage
+- README.md
+- .nojekyll
+- 404.html
+- SITEMAP.html
+- sitemap.xml
+- robots.txt
+- GITHUB_PAGES_SETUP.html
+- tools/verify_site.py
+
+VALIDATION
+- Lesson pages: 1000
+- Categories: 20
+- Broken local links: 0
+- Exact duplicate lesson files: 0
+- Short/stub lessons under 6500 bytes: 0
+- Smallest lesson page: over 10 KB
+- Site audit: PASSED
+
+EXISTING ONEPAGELOVE PAGES
+This package intentionally does NOT overwrite these files already in your repo:
+- hippo-counter-trainer.html
+- hippopotamus-course.html
+- kings-indian-course.html
+
+MERGE INTO THE EXISTING REPOSITORY
+1. Clone/pull your existing OnePageLove repository.
+2. Copy the CONTENTS of this package into the repository root.
+3. Keep your existing interactive HTML pages.
+4. Run:
+   python3 tools/verify_site.py
+   git status
+   git add .
+   git commit -m "Add 1000-page OnePageLove chess library"
+   git push
+5. If GitHub Pages is not already enabled:
+   GitHub -> Settings -> Pages -> Deploy from a branch -> main -> /(root)
+
+Expected Pages URL:
+https://knightway8.github.io/chess8/
