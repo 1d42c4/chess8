@@ -1,7 +1,7 @@
 {
   "sourceFolder": "OnePageLove",
-  "repository": "https://github.com/knightway8/chess8",
-  "website": "https://knightway8.github.io/chess8/",
+  "repository": "https://github.com/1d42c4/chess8",
+  "website": "https://1d42c4.github.io/chess8/",
   "originalFileCount": 1035,
   "files": [
     {
@@ -23,9 +23,9 @@
     {
       "path": "404.html",
       "sourceBytes": 475,
-      "uploadedBytes": 159976,
+      "uploadedBytes": 159973,
       "sourceSha256": "d57e8555c47697cf01db5f1eb2844a8a5c7a7b67fc987358f78bab85199707c9",
-      "uploadedSha256": "16bbaa9543c30a5b7016f117c80827b1a6d72227adcbb37cba82c1ae486ef730",
+      "uploadedSha256": "c11a9f3cd5b1b04391e02447474d2d535dc7fd2b340f548b45b101070adb0c9b",
       "modified": true
     },
     {
@@ -193,7 +193,7 @@
       "sourceBytes": 1075,
       "uploadedBytes": 1074,
       "sourceSha256": "16393887098bc536f40b278632f001b6b0a0bd259f9c7578ec70e1237c42534e",
-      "uploadedSha256": "b89c91de1ea714eefe0ffac86f1d23e3749d61129b6697ccef73fba1579edb55",
+      "uploadedSha256": "04d5c806c2402840a7d118c9d6a039046166ce3240730ad2ab9faa7f138adcd2",
       "modified": true
     },
     {
@@ -9231,9 +9231,9 @@
     {
       "path": "MANIFEST.txt",
       "sourceBytes": 1399,
-      "uploadedBytes": 1398,
+      "uploadedBytes": 1448,
       "sourceSha256": "6d6c0b07558ce6b0ffa8f825626bd59ec82bffbef26c7f2e44fc63d39d300e89",
-      "uploadedSha256": "02ec648cca9a31cbf6a40d2e750eccebcab67381c44927adfd228e08d3b2b968",
+      "uploadedSha256": "004a0ebe5f759669ebd5251d71f3f473b959f61dcfd74d379d15814b4141a93b",
       "modified": true
     },
     {
@@ -9247,17 +9247,17 @@
     {
       "path": "README.md",
       "sourceBytes": 2224,
-      "uploadedBytes": 5567,
+      "uploadedBytes": 5643,
       "sourceSha256": "126e2dbd8cd9ef9dd534a6245e466298bcabffbe1d1e12415a78e994fa402371",
-      "uploadedSha256": "d3516a4f77e6bb1df2875fa27890e3132c958fd6bbbd8b2a76c84aa2d691a590",
+      "uploadedSha256": "60ca33c2ce90b8c693d69cd0dec1fb9ef805c32281aba0307bbbadf86a5f2137",
       "modified": true
     },
     {
       "path": "robots.txt",
       "sourceBytes": 81,
-      "uploadedBytes": 80,
+      "uploadedBytes": 79,
       "sourceSha256": "640bf9699655ca5236d9dd51d0c089e538d308d64380a4937c0e5ebcbcb31824",
-      "uploadedSha256": "e6fd2c655e06776148758c28d277dbf8d16fa04d8c8bfd9d6e852d895bc49794",
+      "uploadedSha256": "d97b6724a2a377e128f1496abf76547cad8ee50a64b62d26064fe3b16fc238c2",
       "modified": true
     },
     {
@@ -9271,9 +9271,9 @@
     {
       "path": "sitemap.xml",
       "sourceBytes": 130831,
-      "uploadedBytes": 145429,
+      "uploadedBytes": 142426,
       "sourceSha256": "0ffcfc37fb50682ec36f75fb0dc9a53b14eed0e52332cc07b86d36f6a5719140",
-      "uploadedSha256": "ca99780d48018393e3599023cfabafe17c827948ff7f22037cd3a83819a6821a",
+      "uploadedSha256": "64a5c1797369410c3fbdc47e3e0486bc1a61b5a0f924ea0f7a6856322d2b43a2",
       "modified": true
     },
     {
@@ -9288,19 +9288,19 @@
   "publishingChanges": [
     {
       "path": "GITHUB_PAGES_SETUP.html",
-      "reason": "Updated old GitHub Pages address to this repository’s live site."
+      "reason": "Updated old GitHub Pages address to this repository\u2019s live site."
     },
     {
       "path": "MANIFEST.txt",
-      "reason": "Updated old GitHub Pages address to this repository’s live site."
+      "reason": "Updated old GitHub Pages address to this repository\u2019s live site."
     },
     {
       "path": "robots.txt",
-      "reason": "Updated old GitHub Pages address to this repository’s live site."
+      "reason": "Updated old GitHub Pages address to this repository\u2019s live site."
     },
     {
       "path": "sitemap.xml",
-      "reason": "Updated old GitHub Pages address to this repository’s live site."
+      "reason": "Updated old GitHub Pages address to this repository\u2019s live site."
     },
     {
       "path": "README.md",
