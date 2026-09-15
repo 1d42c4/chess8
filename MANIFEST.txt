@@ -51,4 +51,4 @@ MERGE INTO THE EXISTING REPOSITORY
    GitHub -> Settings -> Pages -> Deploy from a branch -> main -> /(root)
 
 Expected Pages URL:
-https://knightway8.github.io/chess8/
+https://1d42c4.github.io/chess8/
